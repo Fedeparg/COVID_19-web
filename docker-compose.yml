@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  COVID-19_web:
+    build:
+      context: .
+    image: covid-19_web:1.0
+    restart: always
+    ports:
+      - "80:5050"

@@ -2,8 +2,10 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+from flask import Flask
 
-app = dash.Dash(__name__)
+server = Flask(__name__)
+app = dash.Dash(name='web', server=server)
 
 # Esto es para que el desplegable funcione por ahora
 operaciones = ["+", "-", "x", "/"]
@@ -275,4 +277,4 @@ app.layout = html.Div(children=[
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False, host = '0.0.0.0', port = 5050)
+    app.run_server(debug=False, host = '0.0.0.0')

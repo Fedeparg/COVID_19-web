@@ -54,16 +54,6 @@ app.layout = html.Div(children=[
                 html.Br(),
                 html.Br(),
 
-                # Estrato
-                'Estrato:', dcc.Input(
-                    id='estrato',
-                    value='0',
-                    type='number'
-                ),
-
-                html.Br(),
-                html.Br(),
-
                 # HTA
                 'HTA', dcc.RadioItems(
                     id='hta',

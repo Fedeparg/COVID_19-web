@@ -35,11 +35,8 @@ jobs:
         - name: Build Docker image
           run: docker build . -t gcr.io/covid-19-models-web/covid-19
 
-        - name: Logout
-          run: docker logout
-
         - name: Push Docker image
-          run: docker push $IMAGE_NAME
+          run: docker push gcr.io/covid-19-models-web/covid-19
 
         - name: Deploy Docker image
-          run: gcloud run deploy ${{ secrets.GCP_APP_NAME }} --image $IMAGE_NAME --region europe-west3 --platform managed
+          run: gcloud run deploy ${{ secrets.GCP_APP_NAME }} --image gcr.io/covid-19-models-web/covid-19 --region europe-west3 --platform managed

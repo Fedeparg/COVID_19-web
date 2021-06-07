@@ -17,7 +17,7 @@ jobs:
         steps:
 
         - name: Login
-          uses: google-github-actions/setup-gcloud@master
+          uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
           with:
             project_id: ${{ secrets.GCP_PROJECT_ID }}
             service_account_email: ${{ secrets.GCP_EMAIL }}
@@ -29,14 +29,11 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v2
 
-        - name: Set Project
-          run: gcloud config set project covid-19-models-web && export PROJECT_ID="$(gcloud config get-value project -q)"
-
         - name: Build Docker image
-          run: docker build . -t gcr.io/covid-19-models-web/covid-19
+          run: docker build . -t $IMAGE_NAME
 
         - name: Push Docker image
-          run: docker push gcr.io/covid-19-models-web/covid-19
+          run: docker push $IMAGE_NAME
 
         - name: Deploy Docker image
-          run: gcloud run deploy ${{ secrets.GCP_APP_NAME }} --image gcr.io/covid-19-models-web/covid-19 --region europe-west3 --platform managed
+          run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image $IMAGE_NAME --region europe-west3 --platform managed

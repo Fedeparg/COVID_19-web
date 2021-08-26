@@ -2,7 +2,7 @@ import base64
 import os
 from urllib.parse import quote as urlquote
 
-import dash
+from dash import Dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
@@ -15,7 +15,7 @@ if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
 
 server = Flask(__name__)
-app = dash.Dash(name='web', server=server)
+app = Dash(name='web', server=server)
 
 # Esto es para que el desplegable funcione por ahora
 operaciones = ["Random Forest", "CNN", "CNN + MLP"]

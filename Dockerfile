@@ -9,9 +9,9 @@ RUN pip install -r /requirements.txt
 COPY ./ ./
 EXPOSE $PORT
 
-CMD gunicorn -w 10 -b 0.0.0.0:8080 -t 100000 --max-requests 20 web:server
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "--max-requests", "20", "web:server"]
 
 #CMD ["python", "./web.py"]
 
 
-# To run: docker run -it --name covid19 --rm -p 8050:8050 covid19
+# To run: docker run -it --name covid19 --rm -p 8080:8050 covid19

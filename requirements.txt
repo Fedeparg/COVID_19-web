@@ -1,2 +1,4 @@
 dash==1.19.0
 gunicorn
+tensorflow
+pickle

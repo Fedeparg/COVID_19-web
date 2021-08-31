@@ -13,9 +13,8 @@ def parse_algorithm(algorithm, estratificacion, selene):
     if algorithm == 'Random Forest':
         print('Random Forest')
     elif algorithm == 'CNN':
-        print('CNN')
+        return cnn()
     elif algorithm == 'CNN + MLP':
-        print("Hola")
         return cnn_mlp()
 
 
@@ -50,11 +49,12 @@ def process_selene(selene, estratificacion=None, ventana=15):
         if test5.shape[0] < 15:
             test5 = test5.append(test5.iloc[[-1]*(15-test5.shape[0])])
             test5.reset_index(inplace=True)
-            test5.drop(columns=['level_0', 'index'], inplace=True)
+            test5.drop(columns=['index'], inplace=True)
 
         # Concatenamos los dataframes y nos cargamos la columna ID que sobra
         test2 = pd.concat((test2.copy(), test5.copy()), axis=1)
         test2 = test2.drop(columns=['ID_PACIENTE_DROP'])
+        print(test2)
 
     if final.empty:
         final = test2.copy()
@@ -93,7 +93,7 @@ def process_selene(selene, estratificacion=None, ventana=15):
             x = test2
         else:
             x = np.concatenate((x, test2))
-
+        print(x)
     return x
 
 
@@ -102,23 +102,35 @@ def random_forest():
 
 
 def cnn():
-    pass
+    model = load_model('./cnn.h5')
+    selene = pd.read_csv(
+        './project/app_uploaded_files/selene_test', index_col = [0, 1])
+    estratificacion = pd.read_csv(
+        './project/app_uploaded_files/estratificacion_test', index_col=0)
+    x = process_selene(selene, estratificacion=estratificacion, ventana=15)
+    print(x.shape)
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x)
+    x_scaled = x_scaled.reshape(x_scaled.shape[0], x_scaled.shape[1], 1)
+    result = model.predict(x=x_scaled)[0][0]
+    return round(result)
 
 
 def cnn_mlp():
     model = load_model('./cnn_mlp.h5')
-    selene = pd.read_csv('./project/app_uploaded_files/selene_test', index_col =0)
-    selene_procesado = process_selene(selene, ventana = 15)
+    selene = pd.read_csv(
+        './project/app_uploaded_files/selene_test', index_col=0)
+    selene_procesado = process_selene(selene, ventana=15)
 
     estratificacion = pd.read_csv(
         './project/app_uploaded_files/estratificacion_test', index_col=0)
     selene.drop(columns=['FECHA_TOMA'], inplace=True)
 
     estratificacion = estratificacion.values
-    
+
     scaler_estratificacion = preprocessing.StandardScaler()
-    estratificacion_scaled = scaler_estratificacion.fit_transform(estratificacion)
+    estratificacion_scaled = scaler_estratificacion.fit_transform(
+        estratificacion)
 
     result = model.predict(x=[estratificacion_scaled, selene_procesado])[0][0]
     return round(result)
-

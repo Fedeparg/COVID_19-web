@@ -4,6 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import time
 from tqdm import tqdm
+import pickle
 
 from sklearn import preprocessing
 from tensorflow.keras.models import load_model
@@ -11,7 +12,7 @@ from tensorflow.keras.models import load_model
 
 def parse_algorithm(algorithm, estratificacion, selene):
     if algorithm == 'Random Forest':
-        print('Random Forest')
+        return random_forest()
     elif algorithm == 'CNN':
         return cnn()
     elif algorithm == 'CNN + MLP':
@@ -98,7 +99,17 @@ def process_selene(selene, estratificacion=None, ventana=15):
 
 
 def random_forest():
-    pass
+    model = pickle.load(open('./rf.pickle', 'rb'))
+    print(type(model))
+    selene = pd.read_csv(
+        './project/app_uploaded_files/selene_test', index_col = [0, 1])
+    estratificacion = pd.read_csv(
+        './project/app_uploaded_files/estratificacion_test', index_col=0)
+    x = process_selene(selene, estratificacion=estratificacion, ventana=15)
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x)
+    result = model.predict(x_scaled)[0]
+    return round(result)
 
 
 def cnn():
@@ -108,7 +119,6 @@ def cnn():
     estratificacion = pd.read_csv(
         './project/app_uploaded_files/estratificacion_test', index_col=0)
     x = process_selene(selene, estratificacion=estratificacion, ventana=15)
-    print(x.shape)
     min_max_scaler = preprocessing.MinMaxScaler()
     x_scaled = min_max_scaler.fit_transform(x)
     x_scaled = x_scaled.reshape(x_scaled.shape[0], x_scaled.shape[1], 1)

@@ -9,6 +9,9 @@ from dash.dependencies import Input, Output, State
 from flask import Flask, send_from_directory
 
 
+from data_processing import parse_algorithm, cnn_mlp
+
+
 UPLOAD_DIRECTORY = "./project/app_uploaded_files/"
 
 if not os.path.exists(UPLOAD_DIRECTORY):
@@ -19,6 +22,7 @@ app = Dash(name='web', server=server)
 
 # Esto es para que el desplegable funcione por ahora
 operaciones = ["Random Forest", "CNN", "CNN + MLP"]
+
 
 @server.route("/download/<path:path>")
 def download(path):
@@ -47,8 +51,8 @@ app.layout = html.Div(children=[
                 dcc.Dropdown(
                     id='model',
                     options=[{'label': i, 'value': i} for i in operaciones],
-                    
-                    value=operaciones[0]
+
+                    value=''
                 ),
                 html.Br(),
 
@@ -60,39 +64,42 @@ app.layout = html.Div(children=[
         html.Div([
             html.H2("File List"),
             dcc.Upload(
-            id="upload-data",
-            children=html.Div(
-                ["Drag and drop or click to select a file to upload."]
+                id="upload-data",
+                children=html.Div(
+                    ["Drag and drop or click to select a file to upload."]
+                ),
+                style={
+                    "width": "100%",
+                    "height": "60px",
+                    "lineHeight": "60px",
+                    "borderWidth": "1px",
+                    "borderStyle": "dashed",
+                    "borderRadius": "5px",
+                    "textAlign": "center",
+                    "margin": "10px",
+                },
+                multiple=True,
             ),
-            style={
-                "width": "100%",
-                "height": "60px",
-                "lineHeight": "60px",
-                "borderWidth": "1px",
-                "borderStyle": "dashed",
-                "borderRadius": "5px",
-                "textAlign": "center",
-                "margin": "10px",
-            },
-            multiple=True,
-        ),
-        html.Br(),
-        html.Ul(id="file-list"),
+            html.Br(),
+            html.Ul(id="file-list"),
         ],
-        style={'width': '50%', 'display': 'inline-block'}),
+            style={'width': '50%', 'display': 'inline-block'}),
     ], style={'columnCount': 2}),
     html.Br(),
     html.Div([
-        html.Button(children='Procesar', id='button', n_clicks = 0)
+        html.Button(children='Procesar', id='button', n_clicks=0)
     ]),
-    html.Div(id='output-container', children='Presiona el botón tras haber seleccionado un algoritmo y haya algún par de ficheros subidos.')
+    html.Div(id='output-container',
+             children='Presiona el botón tras haber seleccionado un algoritmo y haya algún par de ficheros subidos.')
 ],)
+
 
 def save_file(name, content):
     """Decode and store a file uploaded with Plotly Dash."""
     data = content.encode("utf8").split(b";base64,")[1]
     with open(os.path.join(UPLOAD_DIRECTORY, name), "wb") as fp:
         fp.write(base64.decodebytes(data))
+
 
 def uploaded_files():
     """List the files in the upload directory."""
@@ -110,23 +117,30 @@ def file_download_link(filename):
     return html.A(filename, href=location)
 
 
-
 @app.callback(
     Output('output-container', 'children'),
     Input('button', 'n_clicks'),
     State('model', 'value'))
-
 def update_output(n_clicks, value):
     try:
-        estr = open('./project/app_uploaded_files/estratificacion_test.csv')
-        selene = open('./project/app_uploaded_files/selene_test.csv')
+        estr = open('./project/app_uploaded_files/estratificacion_test')
+        selene = open('./project/app_uploaded_files/selene_test')
     except IOError:
         print('File not accesible')
 
-    return 'El algortimo elegido es "{}" y el fichero inicial es"{}'.format(
-        value,
-        estr.name
-    )
+    finally:
+        estr.close()
+        selene.close()
+
+    if value is not "":
+        resultado = parse_algorithm(value, estr, selene)
+        return 'Con el modelo seleccionado "{}" y el fichero incluido, se devuelve como resultado "{}". 0 representa la supervivencia del paciente y 1 su defunción'.format(
+            value,
+            resultado
+        )
+    else:
+        return 'Seleccione un modelo.'
+
 
 @app.callback(
     Output("file-list", "children"),
@@ -145,5 +159,6 @@ def update_output(uploaded_filenames, uploaded_file_contents):
     else:
         return [html.Li(file_download_link(filename)) for filename in files]
 
+
 if __name__ == '__main__':
-    app.run_server(debug=True, host = '0.0.0.0')
+    app.run_server(debug=True, host='0.0.0.0')

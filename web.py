@@ -132,7 +132,7 @@ def update_output(n_clicks, value):
         estr.close()
         selene.close()
 
-    if value is not "":
+    if value != "":
         resultado = parse_algorithm(value, estr, selene)
         return 'Con el modelo seleccionado "{}" y el fichero incluido, se devuelve como resultado "{}". 0 representa la supervivencia del paciente y 1 su defunción'.format(
             value,
@@ -161,4 +161,4 @@ def update_output(uploaded_filenames, uploaded_file_contents):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, host='0.0.0.0')
+    app.run_server(debug=False, host='0.0.0.0')

@@ -1,9 +1,6 @@
 import pandas as pd
 import sys
 import numpy as np
-from matplotlib import pyplot as plt
-import time
-from tqdm import tqdm
 import pickle
 
 from sklearn import preprocessing
@@ -55,7 +52,6 @@ def process_selene(selene, estratificacion=None, ventana=15):
         # Concatenamos los dataframes y nos cargamos la columna ID que sobra
         test2 = pd.concat((test2.copy(), test5.copy()), axis=1)
         test2 = test2.drop(columns=['ID_PACIENTE_DROP'])
-        print(test2)
 
     if final.empty:
         final = test2.copy()
@@ -94,13 +90,11 @@ def process_selene(selene, estratificacion=None, ventana=15):
             x = test2
         else:
             x = np.concatenate((x, test2))
-        print(x)
     return x
 
 
 def random_forest():
     model = pickle.load(open('./rf.pickle', 'rb'))
-    print(type(model))
     selene = pd.read_csv(
         './project/app_uploaded_files/selene_test', index_col = [0, 1])
     estratificacion = pd.read_csv(

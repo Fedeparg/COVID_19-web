@@ -5,7 +5,7 @@ from urllib.parse import quote as urlquote
 from dash import Dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from flask import Flask, send_from_directory
 
 
@@ -45,8 +45,9 @@ app.layout = html.Div(children=[
                 # Seleccion de modelo
                 'Selecciona un modelo:',
                 dcc.Dropdown(
-                    id='operation',
+                    id='model',
                     options=[{'label': i, 'value': i} for i in operaciones],
+                    
                     value=operaciones[0]
                 ),
                 html.Br(),
@@ -82,7 +83,7 @@ app.layout = html.Div(children=[
     ], style={'columnCount': 2}),
     html.Br(),
     html.Div([
-        html.Button('Procesar', id='button')
+        html.Button(children='Procesar', id='button', n_clicks = 0)
     ]),
     html.Div(id='output-container', children='Presiona el botón tras haber seleccionado un algoritmo y haya algún par de ficheros subidos.')
 ],)
@@ -108,6 +109,24 @@ def file_download_link(filename):
     location = "/download/{}".format(urlquote(filename))
     return html.A(filename, href=location)
 
+
+
+@app.callback(
+    Output('output-container', 'children'),
+    Input('button', 'n_clicks'),
+    State('model', 'value'))
+
+def update_output(n_clicks, value):
+    try:
+        estr = open('./project/app_uploaded_files/estratificacion_test.csv')
+        selene = open('./project/app_uploaded_files/selene_test.csv')
+    except IOError:
+        print('File not accesible')
+
+    return 'El algortimo elegido es "{}" y el fichero inicial es"{}'.format(
+        value,
+        estr.name
+    )
 
 @app.callback(
     Output("file-list", "children"),

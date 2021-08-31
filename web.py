@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output
 from flask import Flask, send_from_directory
 
 
-UPLOAD_DIRECTORY = "./tmp/"
+UPLOAD_DIRECTORY = "./project/app_uploaded_files/"
 
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
@@ -47,17 +47,18 @@ app.layout = html.Div(children=[
                 dcc.Dropdown(
                     id='operation',
                     options=[{'label': i, 'value': i} for i in operaciones],
-                    value=''
+                    value=operaciones[0]
                 ),
                 html.Br(),
 
 
             ],
             style={'width': '50%', 'display': 'inline-block'}),
+
         html.Br(),
-
-
-        dcc.Upload(
+        html.Div([
+            html.H2("File List"),
+            dcc.Upload(
             id="upload-data",
             children=html.Div(
                 ["Drag and drop or click to select a file to upload."]
@@ -74,11 +75,16 @@ app.layout = html.Div(children=[
             },
             multiple=True,
         ),
-        html.H2("File List"),
+        html.Br(),
         html.Ul(id="file-list"),
-
-
-    ], style={'columnCount': 3}),
+        ],
+        style={'width': '50%', 'display': 'inline-block'}),
+    ], style={'columnCount': 2}),
+    html.Br(),
+    html.Div([
+        html.Button('Procesar', id='button')
+    ]),
+    html.Div(id='output-container', children='Presiona el botón tras haber seleccionado un algoritmo y haya algún par de ficheros subidos.')
 ],)
 
 def save_file(name, content):
